@@ -7,14 +7,15 @@
 
 -- select p1.nppes_provider_first_name as first_name,
 -- 	p1.nppes_provider_last_org_name as last_name,
--- 	p2.total_claim_count
+-- 	p2.total_claim_count,
+-- 	p1.npi
 -- from prescriber as p1
 -- join prescription as p2
 -- 	on p1.npi = p2.npi
--- group by first_name, last_name, p2.total_claim_count
+-- group by first_name, last_name, p2.total_claim_count, p1.npi
 -- order by p2.total_claim_count desc;
 
--- David Coffey - 4538
+-- David Coffey - 4538 - 1912011792
 
 --     b. Repeat the above, but this time report the nppes_provider_first_name, nppes_provider_last_org_name, specialty_description, and the total number of claims.
 
@@ -61,22 +62,42 @@
 --     b. Which specialty had the most total number of claims for opioids?
 
 -- select p1.specialty_description,
--- 	count(p2.total_claim_count) as claim_count,
--- 	count(d.opioid_drug_flag) as opioid
+-- 	count(d.opioid_drug_flag) as opioid_count
 -- from prescriber as p1
 -- join prescription as p2
 -- on p1.npi = p2.npi
 -- join drug as d
--- on p2.drug_name = d.drug_name	
+-- on p2.drug_name = d.drug_name
+-- where d.opioid_drug_flag like 'Y'
 -- group by p1.specialty_description
--- order by opioid desc;
+-- order by opioid_count desc;
 
--- Need help on the above query. I don't understand why I am not getting the opoid count. 
-
+-----Nurse Practicioner
 
 --     c. **Challenge Question:** Are there any specialties that appear in the prescriber table that have no associated prescriptions in the prescription table?
 
+-- select distinct specialty_description
+-- from prescriber
+-- where specialty_description not in
+-- 	(select prescriber.specialty_description
+-- 	from prescription
+-- 	join prescriber
+-- 	on prescription.npi = prescriber.npi)
+-- order by 1
+
+-- select prescriber.specialty_description
+-- from prescriber
+-- 	left join prescription
+-- 	using (npi)
+-- except
+-- select prescriber.specialty_description
+-- from prescription
+-- 	left join prescriber
+-- 	using (npi);
+
 --     d. **Difficult Bonus:** *Do not attempt until you have solved all other problems!* For each specialty, report the percentage of total claims by that specialty which are for opioids. Which specialties have a high percentage of opioids?
+
+
 
 -- 3. 
 --     a. Which drug (generic_name) had the highest total drug cost?
@@ -88,7 +109,7 @@
 -- on d.drug_name = p2.drug_name
 -- order by p2.total_drug_cost desc;
 
--- Pirfenidone
+-- Pirfenidone - 2829174.3
 
 --     b. Which drug (generic_name) has the hightest total cost per day? **Bonus: Round your cost per day column to 2 decimal places. Google ROUND to see how this works.**
 
@@ -100,7 +121,7 @@
 -- group by d.generic_name, daily_cost, p2.total_drug_cost
 -- order by p2.total_drug_cost desc;
 
--- Had a lot of trouble with this one
+-- Had a lot of trouble with this one - My answer could be right but it's the same as the previous question. 
 
 
 -- 4. 
@@ -171,7 +192,7 @@
 -- group by f.county
 -- order by max_pop desc;
 
------Shelby - 937847
+---Shelby - 937847
 
 
 -- 6. 
@@ -196,29 +217,31 @@
 
 --     c. Add another column to you answer from the previous part which gives the prescriber first and last name associated with each row.
 
--- select p2.drug_name,
--- 	p2.total_claim_count,
--- 	d.opioid_drug_flag,
--- 	p1.nppes_provider_first_name,
--- 	p1.nppes_provider_last_org_name
--- from prescription as p2
--- join drug as d
--- on p2.drug_name = d.drug_name
--- join prescriber as p1
--- on p2.npi = p1.npi	
--- where p2.total_claim_count >= 3000
--- order by p2.drug_name
+select p2.drug_name,
+	p2.total_claim_count,
+	d.opioid_drug_flag,
+	p1.nppes_provider_first_name,
+	p1.nppes_provider_last_org_name
+from prescription as p2
+join drug as d
+on p2.drug_name = d.drug_name
+join prescriber as p1
+on p2.npi = p1.npi	
+where p2.total_claim_count >= 3000
+order by p2.drug_name
 
 -- 7. The goal of this exercise is to generate a full list of all pain management specialists in Nashville and the number of claims they had for each opioid. **Hint:** The results from all 3 parts will have 637 rows.
 
 --     a. First, create a list of all npi/drug_name combinations for pain management specialists (specialty_description = 'Pain Management) in the city of Nashville (nppes_provider_city = 'NASHVILLE'), where the drug is an opioid (opiod_drug_flag = 'Y'). **Warning:** Double-check your query before running it. You will only need to use the prescriber and drug tables since you don't need the claims numbers yet.
 
-select  
-from 
-join 
-on 
+select npi, specialty_description, drug_name
+from prescriber, drug
+where upper(specialty_description) = 'PAIN MANAGEMENT'
+	and upper(nppes_provider_city) = 'NASHVILLE'
+	and opioid_drug_flag = 'Y'
 
 
 --     b. Next, report the number of claims per drug per prescriber. Be sure to include all combinations, whether or not the prescriber had any claims. You should report the npi, the drug name, and the number of claims (total_claim_count).
-    
+
+
 --     c. Finally, if you have not done so already, fill in any missing values for total_claim_count with 0. Hint - Google the COALESCE function.
